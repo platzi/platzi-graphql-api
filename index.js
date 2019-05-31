@@ -75,6 +75,12 @@ const resolvers = {
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  subscriptions: {
+    onConnect: async connectionParams => {
+      const user = await db.getUserByToken(connectionParams.authToken);
+      return { user };
+    }
+  },
   context: async ({ req, connection }) => {
     const loaders = {
       authors: new DataLoader(keys => db.getManyAuthors(keys))
@@ -82,7 +88,9 @@ const server = new ApolloServer({
     if (connection) {
       return { ...connection.context, loaders };
     }
-    return { loaders };
+    const user = await db.getUserByToken(req.headers.authorization);
+    console.log(user);
+    return { loaders, user };
   }
 });
 

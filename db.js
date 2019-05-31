@@ -30,3 +30,9 @@ module.exports.getManyAuthors = async ids => {
   const dbAuthors = authors.filter(a => ids.includes(a.id));
   return ids.map(id => dbAuthors.find(s => s.id == id));
 };
+module.exports.getUserByToken = async token => {
+  if (token === "luis") {
+    return "Luís";
+  }
+  return null;
+};
