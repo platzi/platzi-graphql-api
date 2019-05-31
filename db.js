@@ -25,3 +25,8 @@ module.exports.likeBook = async id => {
   book.likes += 1;
   return true;
 };
+module.exports.getManyAuthors = async ids => {
+  debug("getManyAuthors", ids);
+  const dbAuthors = authors.filter(a => ids.includes(a.id));
+  return ids.map(id => dbAuthors.find(s => s.id == id));
+};
