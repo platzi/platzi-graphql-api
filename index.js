@@ -1,5 +1,7 @@
 const { ApolloServer, gql } = require("apollo-server");
 
+const db = require("./db");
+
 const typeDefs = gql`
   type Book {
     id: Int!
@@ -12,7 +14,7 @@ const typeDefs = gql`
 
 const resolvers = {
   Query: {
-    books: () => [{ id: 1, title: "meu livro" }]
+    books: async () => await db.getBooks()
   }
 };
 
