@@ -27,6 +27,15 @@ const typeDefs = gql`
     author(id: Int!): Author
     authors: [Author]
   }
+  input LikeBook {
+    id: Int!
+  }
+  type LikeBookResponse {
+    success: Boolean!
+  }
+  type Mutation {
+    likeBook(input: LikeBook!): LikeBookResponse!
+  }
 `;
 
 const resolvers = {
@@ -39,6 +48,12 @@ const resolvers = {
     books: async () => await db.getBooks(),
     author: async (_, params) => await db.getAuthor(params.id),
     authors: async () => await db.getAuthors()
+  },
+  Mutation: {
+    likeBook: async (_, params) => {
+      const success = await db.likeBook(params.input.id);
+      return { success };
+    }
   }
 };
 

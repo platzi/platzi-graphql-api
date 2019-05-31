@@ -18,7 +18,7 @@ module.exports.getAuthor = async id => {
   return authors.find(a => a.id === id);
 };
 module.exports.likeBook = async id => {
-  const book = await getBook(id);
+  const book = books.find(b => b.id === id);
   if (!book) {
     return false;
   }
