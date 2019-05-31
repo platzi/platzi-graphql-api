@@ -1,5 +1,8 @@
-const { ApolloServer, gql } = require("apollo-server");
+const { ApolloServer, gql, PubSub } = require("apollo-server");
 const DataLoader = require("dataloader");
+
+const pubsub = new PubSub();
+const BOOK_CHANGED_TOPIC = "BOOK_CHANGED_TOPIC";
 
 const db = require("./db");
 
@@ -36,6 +39,9 @@ const typeDefs = gql`
   type Mutation {
     likeBook(input: LikeBook!): LikeBookResponse!
   }
+  type Subscription {
+    bookChanged: Book!
+  }
 `;
 
 const resolvers = {
@@ -52,7 +58,16 @@ const resolvers = {
   Mutation: {
     likeBook: async (_, params) => {
       const success = await db.likeBook(params.input.id);
+      if (success) {
+        const book = await db.getBook(params.input.id);
+        pubsub.publish(BOOK_CHANGED_TOPIC, { bookChanged: book });
+      }
       return { success };
+    }
+  },
+  Subscription: {
+    bookChanged: {
+      subscribe: () => pubsub.asyncIterator(BOOK_CHANGED_TOPIC)
     }
   }
 };
@@ -60,10 +75,13 @@ const resolvers = {
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: async ({ req }) => {
+  context: async ({ req, connection }) => {
     const loaders = {
       authors: new DataLoader(keys => db.getManyAuthors(keys))
     };
+    if (connection) {
+      return { ...connection.context, loaders };
+    }
     return { loaders };
   }
 });
