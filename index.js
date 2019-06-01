@@ -89,7 +89,6 @@ const server = new ApolloServer({
       return { ...connection.context, loaders };
     }
     const user = await db.getUserByToken(req.headers.authorization);
-    console.log(user);
     return { loaders, user };
   }
 });
